@@ -4,9 +4,10 @@ function App() {
   const [textoInput, setTextoInput] = useState("");
   const [peliculas, setPeliculas] = useState([]);
 
-  const pendientesReales = peliculas.filter((pelicula)=>{
-    return pelicula.estado == 0
-  }).length
+  //vemos cuales son las peliculas pendientes por ver realmente
+  const pendientesReales = peliculas.filter((pelicula) => {
+    return pelicula.estado == 0;
+  }).length;
 
   //capturamos el valor
   function capturandoTexto(evento) {
