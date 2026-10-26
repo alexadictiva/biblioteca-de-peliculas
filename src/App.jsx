@@ -1,10 +1,69 @@
+import { useState } from "react";
 
 function App() {
+  const [textoInput, setTextoInput] = useState("");
+  const [peliculas, setPeliculas] = useState([]);
+
+  const pendientesReales = peliculas.filter((pelicula)=>{
+    return pelicula.estado == 0
+  }).length
+
+  //capturamos el valor
+  function capturandoTexto(evento) {
+    setTextoInput(evento.target.value);
+  }
+
+  //agregamos el nuevo elemento
+  function agregarNuevaPeli(evento) {
+    evento.preventDefault();
+
+    if (textoInput == "") {
+      alert("No puedes agregar una peli vacia");
+      return;
+    }
+    //esto es para agregar una pelicula nuevo
+    const nuevaPelicula = {
+      id: crypto.randomUUID(),
+      nombre: textoInput.trim(),
+      estado: 0,
+    };
+
+    setPeliculas([...peliculas, nuevaPelicula]);
+    setTextoInput("");
+  }
+
+  //actualizamos el estado
+  function cambiandoElEstadoDeLaPeli(id, checkado) {
+    //console.log(id, checkado);
+    const peliculasActualizadas = peliculas.map((pelicula) => {
+      if (pelicula.id == id) {
+        return {
+          ...pelicula,
+          estado: checkado ? 1 : 0,
+        };
+      }
+      return pelicula;
+    });
+
+    setPeliculas(peliculasActualizadas);
+  }
+
+  //borramos la peli
+  function eliminandoLaPeli(id) {
+    const listaSinLaPeli = peliculas.filter((pelicula) => {
+      return pelicula.id != id;
+    });
+
+    setPeliculas(listaSinLaPeli);
+  }
+
   return (
     <main className="cinema-app">
       <header className="topbar">
         <a className="brand" href="#" aria-label="Inicio de Corte">
-          <span className="brand-icon" aria-hidden="true">▶</span>
+          <span className="brand-icon" aria-hidden="true">
+            ▶
+          </span>
           CORTE
         </a>
 
@@ -28,11 +87,13 @@ function App() {
       <div className="cinema-layout">
         <aside className="sidebar">
           <section className="add-panel" aria-labelledby="add-title">
-            <span className="panel-number" aria-hidden="true">01 /</span>
+            <span className="panel-number" aria-hidden="true">
+              01 /
+            </span>
             <h2 id="add-title">A la lista.</h2>
             <p>¿Qué película te recomendaron?</p>
 
-            <form className="movie-form">
+            <form className="movie-form" onSubmit={agregarNuevaPeli}>
               <label htmlFor="movie-title">Título de la película</label>
 
               <input
@@ -42,6 +103,8 @@ function App() {
                 placeholder="Ej. El viaje de Chihiro"
                 maxLength={100}
                 autoComplete="off"
+                value={textoInput}
+                onChange={capturandoTexto}
               />
 
               <button className="add-button" type="submit">
@@ -64,81 +127,59 @@ function App() {
               <h2 id="collection-title">Mi selección</h2>
             </div>
 
-            <span className="pending-badge">2 por ver</span>
+            <span className="pending-badge">{pendientesReales} por ver</span>
           </header>
 
           <ul className="movie-list">
-            <li className="movie-card">
-              <div className="movie-symbol" aria-hidden="true">▶</div>
+            {peliculas.length > 0
+              ? peliculas.map((pelicula) => {
+                  return (
+                    <li
+                      key={pelicula.id}
+                      className={`movie-card ${pelicula.estado == 1 ? "is-watched" : ""}`}
+                    >
+                      <div className="movie-symbol" aria-hidden="true">
+                        {pelicula.estado != 1 ? "▶" : "✓"}
+                      </div>
 
-              <div className="movie-info">
-                <span className="movie-status">POR VER</span>
-                <h3>El viaje de Chihiro</h3>
-              </div>
+                      <div className="movie-info">
+                        <span className="movie-status">
+                          {pelicula.estado != 1 ? "POR VER" : "YA LA VI"}
+                        </span>
+                        <h3>{pelicula.nombre}</h3>
+                      </div>
 
-              <div className="movie-actions">
-                <label className="watched-control">
-                  <input type="checkbox" />
-                  <span>Vista</span>
-                </label>
+                      <div className="movie-actions">
+                        <label className="watched-control">
+                          <input
+                            type="checkbox"
+                            onChange={(evento) => {
+                              cambiandoElEstadoDeLaPeli(
+                                pelicula.id,
+                                evento.target.checked,
+                              );
+                            }}
+                          />
+                          <span>
+                            {pelicula.estado != 1 ? "POR VER" : "VISTA"}
+                          </span>
+                        </label>
 
-                <button
-                  className="delete-button"
-                  type="button"
-                  aria-label="Eliminar El viaje de Chihiro"
-                >
-                  Eliminar
-                </button>
-              </div>
-            </li>
-
-            <li className="movie-card">
-              <div className="movie-symbol" aria-hidden="true">▶</div>
-
-              <div className="movie-info">
-                <span className="movie-status">POR VER</span>
-                <h3>Interestelar</h3>
-              </div>
-
-              <div className="movie-actions">
-                <label className="watched-control">
-                  <input type="checkbox" />
-                  <span>Vista</span>
-                </label>
-
-                <button
-                  className="delete-button"
-                  type="button"
-                  aria-label="Eliminar Interestelar"
-                >
-                  Eliminar
-                </button>
-              </div>
-            </li>
-
-            <li className="movie-card is-watched">
-              <div className="movie-symbol" aria-hidden="true">✓</div>
-
-              <div className="movie-info">
-                <span className="movie-status">YA LA VI</span>
-                <h3>Ratatouille</h3>
-              </div>
-
-              <div className="movie-actions">
-                <label className="watched-control">
-                  <input type="checkbox" defaultChecked />
-                  <span>Vista</span>
-                </label>
-
-                <button
-                  className="delete-button"
-                  type="button"
-                  aria-label="Eliminar Ratatouille"
-                >
-                  Eliminar
-                </button>
-              </div>
-            </li>
+                        <button
+                          className="delete-button"
+                          type="button"
+                          aria-label={`Eliminar ${pelicula.nombre}`}
+                          onClick={() => {
+                            eliminandoLaPeli(pelicula.id);
+                          }}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </li>
+                  );
+                })
+              : `Nada en la lista. Agrega nuevas pelis`}
           </ul>
 
           <footer className="collection-footer">
